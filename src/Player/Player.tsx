@@ -1,9 +1,12 @@
-import { useKeyboardControls } from "@react-three/drei"
+import { Html, useKeyboardControls } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
-import { useEffect, useRef, useState } from "react"
+import { useRef } from "react"
 import * as THREE from "three"
-import { calculateIdealOffset, calculateIdealLookAt } from "./util"
+import { calculateIdealOffset, calculateIdealLookAt } from "../util"
 import {
+  ColliderProps,
+  CollisionEnterPayload,
+  CollisionPayload,
   CuboidCollider,
   RigidBody,
   RigidBodyApi,
@@ -11,6 +14,8 @@ import {
 } from "@react-three/rapier"
 import * as RAPIER from "@dimforge/rapier3d-compat"
 import Sprite from "./Sprite"
+import { useEntity } from "../hooks/useEntity"
+import HealthBar from "./HealthBar"
 
 const frontVector = new THREE.Vector3()
 const sideVector = new THREE.Vector3()
@@ -21,14 +26,29 @@ const SPEED = 3
 const RUN_SPEED = 6
 
 export default function Player() {
-  const ref = useRef<RigidBodyApi>(null!)
   const sprite = useRef<THREE.Sprite>(null!)
+  const ref = useRef<RigidBodyApi>(null!)
+
+  const recovery = useRef(0)
+
+  const [, alive, health, hurt] = useEntity(sprite)
 
   const rapier = useRapier()
 
   const [_, get] = useKeyboardControls()
 
-  useFrame(({ camera }) => {
+  const handleCollision = ({ manifold, target, other }) => {
+    if (other.rigidBodyObject) {
+      if (other.rigidBodyObject.name === "lava") {
+        recovery.current = 1
+        hurt(20)
+      }
+    }
+  }
+
+  useFrame(({ camera }, delta) => {
+    if (!alive) return null
+
     const player = ref.current
 
     const { forward, backward, left, right, jump, run } = get()
@@ -61,7 +81,8 @@ export default function Player() {
       z: movementVector.z,
     })
 
-    sprite.current.position.copy(player.translation())
+    //* recovery
+    if (recovery.current > 0) recovery.current -= delta
 
     //* camera
     const idealOffset = calculateIdealOffset(player)
@@ -74,17 +95,24 @@ export default function Player() {
 
   return (
     <>
-      <RigidBody
-        ref={ref}
-        type='dynamic'
-        enabledRotations={[false, false, false]}
-        mass={1}
-        colliders={false}
-        position={[0, 2, 4]}
-      >
-        <CuboidCollider args={[0.18, 0.25, 0.05]} />
-      </RigidBody>
-      <Sprite ref={sprite} />
+      {alive && (
+        <>
+          <RigidBody
+            ref={ref}
+            enabledRotations={[false, false, false]}
+            mass={1}
+            position={[0, 2, 4]}
+            onCollisionEnter={(c: any) =>
+              recovery.current <= 0 ? handleCollision(c) : null
+            }
+          >
+            <CuboidCollider name='player' args={[0.18, 0.25, 0.05]}>
+              <HealthBar health={health} />
+              <Sprite ref={sprite} />
+            </CuboidCollider>
+          </RigidBody>
+        </>
+      )}
     </>
   )
 }

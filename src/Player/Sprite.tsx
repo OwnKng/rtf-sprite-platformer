@@ -1,6 +1,6 @@
 import { useFrame } from "@react-three/fiber"
-import json from "./ninja.json"
-import { useAseprite } from "./hooks/useAseprite"
+import json from "../ninja.json"
+import { useAseprite } from "../hooks/useAseprite"
 import { useKeyboardControls } from "@react-three/drei"
 import { forwardRef, useRef } from "react"
 

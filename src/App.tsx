@@ -1,9 +1,15 @@
 import { Canvas } from "@react-three/fiber"
-import Player from "./Player"
+import Player from "./Player/Player"
 import { KeyboardControls } from "@react-three/drei"
 import { Physics, RigidBody } from "@react-three/rapier"
+import { useEntities } from "./hooks/useEntities"
+import Lava from "./Lava"
 
 export default function App() {
+  const { entities } = useEntities()
+
+  console.log(entities)
+
   return (
     <Canvas>
       <KeyboardControls
@@ -19,6 +25,7 @@ export default function App() {
       >
         <Physics>
           <Player />
+          <Lava />
           <RigidBody type='fixed'>
             <mesh position={[-2, 1, 0]}>
               <boxGeometry args={[5, 0.1, 2]} />
