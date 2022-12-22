@@ -1,12 +1,9 @@
 import { Html, useKeyboardControls } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import * as THREE from "three"
 import { calculateIdealOffset, calculateIdealLookAt } from "../util"
 import {
-  ColliderProps,
-  CollisionEnterPayload,
-  CollisionPayload,
   CuboidCollider,
   RigidBody,
   RigidBodyApi,
@@ -16,6 +13,7 @@ import * as RAPIER from "@dimforge/rapier3d-compat"
 import Sprite from "./Sprite"
 import { useEntity } from "../hooks/useEntity"
 import HealthBar from "./HealthBar"
+import { useStatus } from "../hooks/useStatus"
 
 const frontVector = new THREE.Vector3()
 const sideVector = new THREE.Vector3()
@@ -32,6 +30,11 @@ export default function Player() {
   const recovery = useRef(0)
 
   const [, alive, health, hurt] = useEntity(sprite)
+  const { setGameOver } = useStatus()
+
+  useEffect(() => {
+    if (!alive) setGameOver()
+  }, [alive])
 
   const rapier = useRapier()
 
@@ -98,6 +101,7 @@ export default function Player() {
       {alive && (
         <>
           <RigidBody
+            type='dynamic'
             ref={ref}
             enabledRotations={[false, false, false]}
             mass={1}

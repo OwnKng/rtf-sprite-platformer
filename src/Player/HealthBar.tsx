@@ -2,9 +2,9 @@ import { Html } from "@react-three/drei"
 import { useSpring, animated } from "react-spring"
 
 export default function HealthBar({ health }: { health: number }) {
-  const [props, api] = useSpring(
+  const [props] = useSpring(
     () => ({
-      from: { width: 100 },
+      from: { width: 80 },
       to: { width: health },
     }),
     [health]
@@ -16,8 +16,8 @@ export default function HealthBar({ health }: { health: number }) {
         <div
           style={{
             background: "white",
-            width: "100px",
-            height: 10,
+            width: 80,
+            height: 5,
             position: "relative",
           }}
         >
@@ -28,7 +28,8 @@ export default function HealthBar({ health }: { health: number }) {
               background: "hotpink",
               top: 0,
               left: 0,
-              height: 10,
+
+              height: 5,
             }}
           />
         </div>
