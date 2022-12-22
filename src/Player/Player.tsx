@@ -1,4 +1,4 @@
-import { Html, useKeyboardControls } from "@react-three/drei"
+import { useKeyboardControls } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
@@ -13,7 +13,7 @@ import * as RAPIER from "@dimforge/rapier3d-compat"
 import Sprite from "./Sprite"
 import { useEntity } from "../hooks/useEntity"
 import HealthBar from "./HealthBar"
-import { useStatus } from "../hooks/useStatus"
+import { useAppData } from "../hooks/useAppData"
 
 const frontVector = new THREE.Vector3()
 const sideVector = new THREE.Vector3()
@@ -27,13 +27,14 @@ export default function Player() {
   const sprite = useRef<THREE.Sprite>(null!)
   const ref = useRef<RigidBodyApi>(null!)
 
+  const { setWin, setLose } = useAppData()
+
   const recovery = useRef(0)
 
   const [, alive, health, hurt] = useEntity(sprite)
-  const { setGameOver } = useStatus()
 
   useEffect(() => {
-    if (!alive) setGameOver()
+    if (!alive) setLose()
   }, [alive])
 
   const rapier = useRapier()
@@ -43,8 +44,14 @@ export default function Player() {
   const handleCollision = ({ manifold, target, other }) => {
     if (other.rigidBodyObject) {
       if (other.rigidBodyObject.name === "lava") {
-        recovery.current = 1
-        hurt(20)
+        if (recovery.current <= 0) {
+          recovery.current = 1
+          hurt(20)
+        }
+      }
+
+      if (other.rigidBodyObject.name === "destination") {
+        setWin(true)
       }
     }
   }
@@ -90,9 +97,7 @@ export default function Player() {
     //* camera
     const idealOffset = calculateIdealOffset(player)
     camera.position.lerp(idealOffset, 0.1)
-
     cameraTarget.lerp(calculateIdealLookAt(player), 0.1)
-
     camera.lookAt(cameraTarget)
   })
 
@@ -106,9 +111,7 @@ export default function Player() {
             enabledRotations={[false, false, false]}
             mass={1}
             position={[0, 2, 4]}
-            onCollisionEnter={(c: any) =>
-              recovery.current <= 0 ? handleCollision(c) : null
-            }
+            onCollisionEnter={handleCollision}
           >
             <CuboidCollider name='player' args={[0.18, 0.25, 0.05]}>
               <HealthBar health={health} />

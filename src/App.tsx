@@ -1,20 +1,18 @@
 import { Canvas } from "@react-three/fiber"
 import Player from "./Player/Player"
-import { KeyboardControls } from "@react-three/drei"
+import { KeyboardControls, OrbitControls } from "@react-three/drei"
 import { Physics, RigidBody } from "@react-three/rapier"
-import { useEntities } from "./hooks/useEntities"
 import Lava from "./Lava"
 import Destination from "./Destination"
-import { useStatus } from "./hooks/useStatus"
+import { useAppData } from "./hooks/useAppData"
 
 export default function App() {
-  const { entities } = useEntities()
-  const { status } = useStatus()
+  const state = useAppData((state) => state.status)
 
   return (
     <>
       <div className='hud'>
-        <h1>{status}</h1>
+        <h1>{state}</h1>
       </div>
       <Canvas>
         <KeyboardControls
