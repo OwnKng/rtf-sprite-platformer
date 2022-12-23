@@ -6,7 +6,7 @@ import { useEntity } from "./hooks/useEntity"
 import { useState } from "react"
 
 export default function Lava({
-  position = [0, 4, 1],
+  position = [0, 3, 2],
 }: {
   position?: [number, number, number]
 }) {
@@ -33,7 +33,7 @@ export default function Lava({
       type='kinematicPosition'
     >
       <mesh>
-        <boxGeometry args={[0.1, 1, 2]} />
+        <boxGeometry args={[0.05, 0.5, 2]} />
         <meshBasicMaterial wireframe={true} color='red' />
       </mesh>
     </RigidBody>

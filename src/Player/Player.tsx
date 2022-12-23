@@ -1,6 +1,6 @@
 import { useKeyboardControls } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { calculateIdealOffset, calculateIdealLookAt } from "../util"
 import {
@@ -11,7 +11,6 @@ import {
 } from "@react-three/rapier"
 import * as RAPIER from "@dimforge/rapier3d-compat"
 import Sprite from "./Sprite"
-import { useEntity } from "../hooks/useEntity"
 import HealthBar from "../HealthBar"
 import { useAppData } from "../hooks/useAppData"
 
@@ -22,7 +21,11 @@ const movementVector = new THREE.Vector3()
 const SPEED = 3
 const RUN_SPEED = 6
 
-export default function Player() {
+export default function Player({
+  position = [-4, 3, 0.5],
+}: {
+  position?: [number, number, number]
+}) {
   const sprite = useRef<THREE.Sprite>(null!)
   const ref = useRef<RigidBodyApi>(null!)
   const cameraTarget = useRef(new THREE.Vector3(0, 0, 0))
@@ -33,20 +36,19 @@ export default function Player() {
   const resetAttack = () => {
     attacking.current = false
     t.current = 0
-    broadcast("Idle")
   }
 
   const { setWin, setLose } = useAppData()
 
   const recovery = useRef(0)
 
-  const [broadcast, alive, health, hurt] = useEntity(sprite)
-
-  useEffect(() => {
-    if (!alive) setLose()
-  }, [alive])
+  const [health, setHealth] = useState(100)
 
   const rapier = useRapier()
+
+  useEffect(() => {
+    if (health <= 0) setLose()
+  }, [health])
 
   const [_, get] = useKeyboardControls()
 
@@ -55,7 +57,7 @@ export default function Player() {
       if (other.rigidBodyObject.name === "lava") {
         if (recovery.current <= 0) {
           recovery.current = 1
-          hurt(20)
+          setHealth((cur) => cur - 2)
         }
       }
 
@@ -66,8 +68,6 @@ export default function Player() {
   }
 
   useFrame(({ camera }, delta) => {
-    if (!alive) return null
-
     const player = ref.current
 
     const { forward, backward, left, right, jump, attack, run } = get()
@@ -75,7 +75,6 @@ export default function Player() {
     //* Attacking
     if (attack) {
       attacking.current = true
-      broadcast("Attack")
     }
 
     if (attacking.current) {
@@ -123,22 +122,18 @@ export default function Player() {
   })
 
   return (
-    <>
-      {alive && (
-        <RigidBody
-          type='dynamic'
-          ref={ref}
-          enabledRotations={[false, false, false]}
-          mass={1}
-          position={[0, 2, 4]}
-          onCollisionEnter={handleCollision}
-        >
-          <CuboidCollider name='player' args={[0.18, 0.25, 0.05]}>
-            <HealthBar health={health} />
-            <Sprite ref={sprite} />
-          </CuboidCollider>
-        </RigidBody>
-      )}
-    </>
+    <RigidBody
+      type='dynamic'
+      ref={ref}
+      enabledRotations={[false, false, false]}
+      mass={1}
+      onCollisionEnter={handleCollision}
+      position={position}
+    >
+      <CuboidCollider name='player' args={[0.18, 0.25, 0.15]}>
+        <HealthBar health={health} />
+        <Sprite ref={sprite} />
+      </CuboidCollider>
+    </RigidBody>
   )
 }
