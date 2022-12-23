@@ -12,13 +12,12 @@ import {
 import * as RAPIER from "@dimforge/rapier3d-compat"
 import Sprite from "./Sprite"
 import { useEntity } from "../hooks/useEntity"
-import HealthBar from "./HealthBar"
+import HealthBar from "../HealthBar"
 import { useAppData } from "../hooks/useAppData"
 
 const frontVector = new THREE.Vector3()
 const sideVector = new THREE.Vector3()
 const movementVector = new THREE.Vector3()
-const cameraTarget = new THREE.Vector3(0, 0, 0)
 
 const SPEED = 3
 const RUN_SPEED = 6
@@ -26,12 +25,22 @@ const RUN_SPEED = 6
 export default function Player() {
   const sprite = useRef<THREE.Sprite>(null!)
   const ref = useRef<RigidBodyApi>(null!)
+  const cameraTarget = useRef(new THREE.Vector3(0, 0, 0))
+
+  const t = useRef<number>(0)
+  const attacking = useRef<boolean>(false)
+
+  const resetAttack = () => {
+    attacking.current = false
+    t.current = 0
+    broadcast("Idle")
+  }
 
   const { setWin, setLose } = useAppData()
 
   const recovery = useRef(0)
 
-  const [, alive, health, hurt] = useEntity(sprite)
+  const [broadcast, alive, health, hurt] = useEntity(sprite)
 
   useEffect(() => {
     if (!alive) setLose()
@@ -61,7 +70,19 @@ export default function Player() {
 
     const player = ref.current
 
-    const { forward, backward, left, right, jump, run } = get()
+    const { forward, backward, left, right, jump, attack, run } = get()
+
+    //* Attacking
+    if (attack) {
+      attacking.current = true
+      broadcast("Attack")
+    }
+
+    if (attacking.current) {
+      t.current += delta * 1000
+      if (t.current > 69 * 6) resetAttack()
+      return
+    }
 
     //* jumping
     const world = rapier.world.raw()
@@ -97,28 +118,26 @@ export default function Player() {
     //* camera
     const idealOffset = calculateIdealOffset(player)
     camera.position.lerp(idealOffset, 0.1)
-    cameraTarget.lerp(calculateIdealLookAt(player), 0.1)
-    camera.lookAt(cameraTarget)
+    cameraTarget.current.lerp(calculateIdealLookAt(player), 0.1)
+    camera.lookAt(cameraTarget.current)
   })
 
   return (
     <>
       {alive && (
-        <>
-          <RigidBody
-            type='dynamic'
-            ref={ref}
-            enabledRotations={[false, false, false]}
-            mass={1}
-            position={[0, 2, 4]}
-            onCollisionEnter={handleCollision}
-          >
-            <CuboidCollider name='player' args={[0.18, 0.25, 0.05]}>
-              <HealthBar health={health} />
-              <Sprite ref={sprite} />
-            </CuboidCollider>
-          </RigidBody>
-        </>
+        <RigidBody
+          type='dynamic'
+          ref={ref}
+          enabledRotations={[false, false, false]}
+          mass={1}
+          position={[0, 2, 4]}
+          onCollisionEnter={handleCollision}
+        >
+          <CuboidCollider name='player' args={[0.18, 0.25, 0.05]}>
+            <HealthBar health={health} />
+            <Sprite ref={sprite} />
+          </CuboidCollider>
+        </RigidBody>
       )}
     </>
   )

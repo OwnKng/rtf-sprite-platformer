@@ -9,21 +9,27 @@ const createStatusStore = (set: any) => ({
 interface Entity {
   id: string
   type: string
+  status: string
 }
 
 interface EntityStore {
   entities: Entity[]
   createEntity: (e: Entity) => void
   deleteEntity: (id: string) => void
+  updateEntity: (id: string, status: string) => void
 }
 
 const createEntitiesStore = (set: any) => ({
   entities: [],
   createEntity: (entity: Entity) =>
-    set((state) => ({ entities: [...state.entities, entity] })),
+    set((state: EntityStore) => ({ entities: [...state.entities, entity] })),
   deleteEntity: (id: string) =>
-    set((state) => ({
-      entities: state.entities.filter((e: Entity) => e.id !== id),
+    set((state: EntityStore) => ({
+      entities: state.entities.filter((e) => e.id !== id),
+    })),
+  updateEntity: (id: string, status: string) =>
+    set((state: EntityStore) => ({
+      entities: state.entities.map((e) => (e.id === id ? { ...e, status } : e)),
     })),
 })
 

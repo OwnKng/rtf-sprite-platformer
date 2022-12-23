@@ -5,6 +5,7 @@ import { Physics, RigidBody } from "@react-three/rapier"
 import Lava from "./Lava"
 import Destination from "./Destination"
 import { useAppData } from "./hooks/useAppData"
+import Enemy from "./Enemy/Enemy"
 
 export default function App() {
   const state = useAppData((state) => state.status)
@@ -30,6 +31,7 @@ export default function App() {
             <Player />
             <Lava />
             <Destination />
+            <Enemy />
             <RigidBody type='fixed'>
               <mesh position={[-2, 1, 0]}>
                 <boxGeometry args={[5, 0.1, 2]} />
