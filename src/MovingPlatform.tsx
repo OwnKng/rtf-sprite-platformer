@@ -46,7 +46,7 @@ export default function MovingPlatform({
     >
       <mesh>
         <boxGeometry args={[width, height, depth]} />
-        <meshBasicMaterial wireframe={true} color='blue' />
+        <meshPhongMaterial color='#202020' />
       </mesh>
     </RigidBody>
   )

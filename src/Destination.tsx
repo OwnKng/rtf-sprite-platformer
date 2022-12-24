@@ -16,7 +16,7 @@ export default function Destination({ position = [2, 4, 2] }: any) {
     >
       <mesh>
         <boxGeometry args={[2, 0.1, 2]} />
-        <meshBasicMaterial wireframe={true} color='blue' />
+        <meshBasicMaterial color='tomato' />
       </mesh>
     </RigidBody>
   )

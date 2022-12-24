@@ -37,7 +37,7 @@ export default function Player({
     t.current = 0
   }
 
-  const { setWin } = useAppData()
+  const { setWin, setLose } = useAppData()
 
   const recovery = useRef(0)
 
@@ -45,10 +45,13 @@ export default function Player({
 
   const [_, get] = useKeyboardControls()
 
-  const handleCollision = ({ manifold, target, other }) => {
+  const handleCollision = ({ manifold, target, other }: any) => {
     if (other.rigidBodyObject) {
       if (other.rigidBodyObject.name === "destination") {
-        setWin(true)
+        setWin()
+      }
+      if (other.rigidBodyObject.name === "boundary") {
+        setLose()
       }
     }
   }

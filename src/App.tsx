@@ -1,16 +1,14 @@
 import { Canvas } from "@react-three/fiber"
 import Player from "./Player/Player"
-import { KeyboardControls, OrbitControls } from "@react-three/drei"
-import { Debug, Physics, RigidBody } from "@react-three/rapier"
-import Lava from "./Lava"
+import { KeyboardControls } from "@react-three/drei"
+import { Physics } from "@react-three/rapier"
 import Destination from "./Destination"
 import { useAppData } from "./hooks/useAppData"
 import Platforms from "./Platform"
-import { useEffect, useState } from "react"
 import Boundary from "./Boundary"
 import MovingPlatform from "./MovingPlatform"
 import RotatingPlatforms from "./RotatingPlatforms"
-import Stars from "./Stars"
+import Coins from "./Coins"
 
 const HudMap = {
   Win: <h1>You win!</h1>,
@@ -19,12 +17,15 @@ const HudMap = {
 }
 
 export default function App() {
-  const status = useAppData((state) => state.status)
+  const [status, points] = useAppData((state) => [state.status, state.points])
 
   return (
     <>
-      <div className='hud'>{HudMap[status]}</div>
-      <Canvas shadows>
+      <div className='hud'>
+        {HudMap[status]}
+        <span>{points.length}</span>
+      </div>
+      <Canvas>
         <KeyboardControls
           map={[
             { name: "forward", keys: ["ArrowUp", "w", "W"] },
@@ -36,6 +37,10 @@ export default function App() {
             { name: "attack", keys: ["k", "K"] },
           ]}
         >
+          <ambientLight intensity={0.8} />
+          <pointLight position={[0, 20, 0]} intensity={2} />
+          <fog attach='fog' args={["#202020", 3, 20]} />
+
           <Physics>
             <Player />
             <MovingPlatform />
@@ -80,7 +85,7 @@ export default function App() {
             <Platforms />
             <Boundary />
             <Destination position={[5, 15, -4]} />
-            <Stars />
+            <Coins />
           </Physics>
         </KeyboardControls>
       </Canvas>

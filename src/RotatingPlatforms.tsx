@@ -3,10 +3,16 @@ import { RigidBody, RigidBodyApi, RigidBodyProps } from "@react-three/rapier"
 import { useRef } from "react"
 import * as THREE from "three"
 
+type Triple = [number, number, number]
+
 const axis = new THREE.Vector3(0, 1, 0)
 const q = new THREE.Quaternion(0, 0, 0)
 
-const coordinates = [
+interface Coordinates {
+  position: Triple
+}
+
+const coordinates: Coordinates[] = [
   { position: [4.5, 11, 4] },
   { position: [10.5, 11, 7.5] },
   { position: [5.5, 12, 11] },
@@ -39,7 +45,7 @@ const RotatingPlatform = (props: RigidBodyProps) => {
     <RigidBody ref={ref} type='kinematicPosition' {...props}>
       <mesh>
         <boxGeometry args={[2, 2, 0.1]} />
-        <meshBasicMaterial wireframe color='red' />
+        <meshPhongMaterial color='#61CBDC' />
       </mesh>
     </RigidBody>
   )

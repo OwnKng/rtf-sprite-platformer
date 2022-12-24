@@ -104,9 +104,9 @@ export default function Platforms() {
 
 const Platform = (props: MeshProps) => {
   return (
-    <mesh {...props} castShadow receiveShadow>
-      <boxGeometry args={[5, 0.1, 2]} />
-      <meshBasicMaterial color='white' wireframe />
+    <mesh {...props} receiveShadow>
+      <boxGeometry args={[5, 0.05, 2]} />
+      <meshPhongMaterial color='#202020' shininess={0} />
     </mesh>
   )
 }
