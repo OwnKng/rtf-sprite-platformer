@@ -10,6 +10,7 @@ import { useEffect, useState } from "react"
 import Boundary from "./Boundary"
 import MovingPlatform from "./MovingPlatform"
 import RotatingPlatforms from "./RotatingPlatforms"
+import Stars from "./Stars"
 
 const HudMap = {
   Win: <h1>You win!</h1>,
@@ -79,6 +80,7 @@ export default function App() {
             <Platforms />
             <Boundary />
             <Destination position={[5, 15, -4]} />
+            <Stars />
           </Physics>
         </KeyboardControls>
       </Canvas>

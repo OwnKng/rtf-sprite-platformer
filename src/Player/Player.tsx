@@ -11,7 +11,6 @@ import {
 } from "@react-three/rapier"
 import * as RAPIER from "@dimforge/rapier3d-compat"
 import Sprite from "./Sprite"
-import HealthBar from "../HealthBar"
 import { useAppData } from "../hooks/useAppData"
 
 const frontVector = new THREE.Vector3()
@@ -38,29 +37,16 @@ export default function Player({
     t.current = 0
   }
 
-  const { setWin, setLose } = useAppData()
+  const { setWin } = useAppData()
 
   const recovery = useRef(0)
 
-  const [health, setHealth] = useState(100)
-
   const rapier = useRapier()
-
-  useEffect(() => {
-    if (health <= 0) setLose()
-  }, [health])
 
   const [_, get] = useKeyboardControls()
 
   const handleCollision = ({ manifold, target, other }) => {
     if (other.rigidBodyObject) {
-      if (other.rigidBodyObject.name === "lava") {
-        if (recovery.current <= 0) {
-          recovery.current = 1
-          setHealth((cur) => cur - 2)
-        }
-      }
-
       if (other.rigidBodyObject.name === "destination") {
         setWin(true)
       }
@@ -131,7 +117,6 @@ export default function Player({
       position={position}
     >
       <CuboidCollider name='player' args={[0.18, 0.25, 0.15]}>
-        <HealthBar health={health} />
         <Sprite ref={sprite} />
       </CuboidCollider>
     </RigidBody>
